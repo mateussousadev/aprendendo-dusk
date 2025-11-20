@@ -26,3 +26,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/.tests
+tests/Browser/screenshots/*
+tests/Browser/console/*

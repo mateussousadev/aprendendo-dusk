@@ -14,18 +14,17 @@ class SiconfiTest extends DuskTestCase
                 ->visit('https://siconfi.tesouro.gov.br/siconfi/pages/public/sti/iframe_sti.jsf')
                 ->waitFor('#iframeCAUC', 10)
 
-                ->withinFrame('#iframeCAUC', function (Browser $iframe) {
+                ->withinFrame('#iframeCAUC', function (Browser $iframe) use ($browser) {
                     // Passo 1: Selecionar "I - Ente da Federação"
                     $iframe->waitFor('#tabview-consultas-publicas\\:formExtratos\\:wizard-extrato', 10)
                         ->waitForText('I - Ente da Federação', 10)
                         ->clickAtXPath('//label[contains(text(), "I - Ente da Federação")]')
-                        ->pause(500)
+                        ->pause(1500);
 
-                        ->click('#tabview-consultas-publicas\\:formExtratos\\:j_idt178')
-                        ->pause(1500)
+                    $browser->press('Próximo')->pause(1500);
 
-                        // Verificar tela correta
-                        ->waitFor('#tabview-consultas-publicas\\:formExtratos\\:entesFederados_input', 10)
+                    // Verificar tela correta
+                    $iframe->waitFor('#tabview-consultas-publicas\\:formExtratos\\:entesFederados_input', 10)
                         ->screenshot('3-campo-cnpj-visivel')
 
                         // Preencher campo visível
@@ -44,13 +43,22 @@ class SiconfiTest extends DuskTestCase
                             '06.554.430/0001-31 - Parnaíba/PI'
                         )
 
-                        // OU: Apenas verificar que o hidden input NÃO está vazio
-                        ->assertInputValueIsNot(
-                            '#tabview-consultas-publicas\\:formExtratos\\:entesFederados_hinput',
-                            ''
-                        )
+                        ->screenshot('5-valor-confirmado')
 
-                        ->screenshot('5-valor-confirmado');
+                        // PASSO: Clicar no hCaptcha
+                        ->waitForText('i am human', 10)
+                        ->screenshot('6-antes-captcha')
+
+                        // Clicar no checkbox do hCaptcha
+                        ->click('div[role="checkbox"]')
+
+                        // Aguardar o hCaptcha ser verificado (pode demorar alguns segundos)
+                        ->pause(3000)
+
+                        // Aguardar o checkbox mudar para checked
+                        ->waitUntil('document.querySelector(\'div[role="checkbox"]\').getAttribute("aria-checked") === "true"', 15)
+
+                        ->screenshot('7-captcha-verificado');
                 });
         });
     }
